@@ -11,38 +11,8 @@ import pandas as pd
 from meta_learners.hyperparam_search import LEARNING_RATE_NAME, \
     DROPOUT_RATE_NAME, lr_droprate_aug_rate_batch_size_gp_search, AUG_RATE_NAME
 from utils.util import ci95
-from .reptile import Reptile, Gecko, DEFAULT_ITER_RANGE
+from .reptile import Gecko, DEFAULT_ITER_RANGE
 from meta_learners.variables import weight_decay
-
-
-# pylint: disable=R0913,R0914
-def evaluate(sess,
-             model,
-             dataset,
-             num_classes=5,
-             num_shots=5,
-             eval_inner_batch_size=5,
-             eval_inner_iters=50,
-             replacement=False,
-             num_samples=10000,
-             transductive=False,
-             weight_decay_rate=1,
-             meta_fn=Reptile):
-    """
-    Evaluate an image classification model on a dataset.
-    """
-    reptile = meta_fn(sess,
-                         transductive=transductive,
-                         pre_step_op=weight_decay(weight_decay_rate))
-    total_correct = 0
-    # Compare prediction to label for each sample:
-    for _ in range(num_samples):
-        total_correct += reptile.evaluate(dataset, model.input_ph, model.label_ph,
-                                          model.minimize_op, model.predictions,
-                                          num_classes=num_classes, num_shots=num_shots,
-                                          inner_batch_size=eval_inner_batch_size,
-                                          inner_iters=eval_inner_iters, replacement=replacement)
-    return total_correct / (num_samples * num_classes)
 
 
 def evaluate_gecko(sess,
@@ -217,7 +187,6 @@ def optimize_update_hyperparams(sess,
 
 
 DEFAULT_K_RANGE = [1, 5, 10, 50, 100, 200, 400]
-# TODO: rerun DEFAULT_K_RANGE = [1, 5, 10] with DEFAULT_ITER_RANGE = [5, 10, 20]
 
 def run_k_shot_learning_curves_experiment(sess,
                    model,
