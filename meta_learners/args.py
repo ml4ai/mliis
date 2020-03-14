@@ -9,7 +9,7 @@ import tensorflow as tf
 
 from meta_learners.hyperparam_search import SUPPORTED_SEARCH_ALGS
 from models.constants import SUPPORTED_MODELS
-from meta_learners.supervised_reptile.supervised_reptile.reptile import Reptile, FOML, Gecko, FOMLIS
+from meta_learners.supervised_reptile.supervised_reptile.reptile import Gecko, FOMLIS
 from models.lr_schedulers import supported_learning_rate_schedulers
 
 
@@ -293,11 +293,6 @@ def _args_gecko(parsed_args):
         return partial(FOMLIS, train_shots=parsed_args.train_shots, tail_shots=parsed_args.foml_tail, sample_train_val_with_replacement=parsed_args.sample_foml_train_val_with_replacement)
     return Gecko
 
-
-def _args_reptile(parsed_args):
-    if parsed_args.foml:
-        return partial(FOML, tail_shots=parsed_args.foml_tail)
-    return Reptile
 
 def str_to_bool(v):
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
