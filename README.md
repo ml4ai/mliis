@@ -26,6 +26,14 @@ python fss_1000_image_to_tfrecord.py --input_dir <path to images and masks> --tf
 
 ## Run the SOTA evaluation
 
+Extract the checkpoint:
+```
+tar -xzvf EfficientLab-6-3_FOMAML-star_checkpoint.tar.gz
+```
+
+Put the FSS-1000 meta-training and evaluation tfrecord shards at the root of this repo or edit the `data_dir` path in `run.sh` to point to the shards on your machine.
+
+Finally, call:
 ```
 ./run.sh
 ```
