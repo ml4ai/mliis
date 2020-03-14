@@ -1,0 +1,5 @@
+airliner
+bus
+motorbike
+potted_plant
+television
