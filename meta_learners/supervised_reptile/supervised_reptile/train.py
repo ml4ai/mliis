@@ -45,7 +45,6 @@ def train_gecko(sess,
                 lr=None,
                 save_best_seen=False,
                 num_tasks_to_eval=100,
-                sample_inner_iters=False,
                 aug_rate: Optional[float]=None):
     """
     Train a model on a dataset.
@@ -84,8 +83,6 @@ def train_gecko(sess,
         tf.global_variables_initializer().run()
         sess.run(tf.global_variables_initializer())
 
-    if sample_inner_iters:
-        print("Sampling number of inner-iters for each example in the meta-batch.")
 
     for i in range(meta_iters):
         begin_time = time.time()
@@ -98,8 +95,7 @@ def train_gecko(sess,
                            num_classes=num_classes, num_shots=(train_shots or num_shots),
                            inner_batch_size=inner_batch_size, inner_iters=inner_iters,
                            replacement=replacement,
-                           meta_step_size=cur_meta_step_size, meta_batch_size=meta_batch_size, lr_ph=model.lr_ph, lr=lr,
-                           sample_inner_iters=sample_inner_iters)
+                           meta_step_size=cur_meta_step_size, meta_batch_size=meta_batch_size, lr_ph=model.lr_ph, lr=lr,)
         # call Gecko.evaluate to track progress:
         if i % eval_interval == 0:
             print('Evaluating training performance.')

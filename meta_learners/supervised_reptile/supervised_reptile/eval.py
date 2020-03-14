@@ -63,8 +63,6 @@ def evaluate_gecko(sess,
                    lr_scheduler=None,
                    lr=None,
                    augment=False,
-                   pascal_fold: Optional[int] = None,
-                   pascal_data_dir: Optional[str] = None,
                    serially_eval_all_tasks: bool = False,
                    aug_rate: Optional[float] = None,
                    ) -> Tuple[float, Dict[str, List[float]]]:
@@ -73,11 +71,6 @@ def evaluate_gecko(sess,
     """
     print("Evaluating with eval_inner_iters: {}".format(eval_inner_iters))
     print("Evaluating with lr: {}".format(lr))
-
-    if pascal_fold is not None:
-        img_cat_pairs = val_img_cat_pairs(pascal_fold, pascal_data_dir)
-    else:
-        img_cat_pairs = None
 
     if save_fine_tuned_checkpoints:
         print("Saving fine-tuned checkpoints to {}".format(save_fine_tuned_checkpoints_dir))
@@ -104,8 +97,7 @@ def evaluate_gecko(sess,
                                   visualize_predicted_segmentations=visualize_predicted_segmentations,
                                   save_fine_tuned_checkpoints=save_fine_tuned_checkpoints,
                                   save_fine_tuned_checkpoints_dir=save_fine_tuned_checkpoints_dir,
-                                  eval_sample_num=i, is_training_ph=model.is_training_ph, lr_ph=model.lr_ph, lr=lr,
-                                  img_cat_pairs=img_cat_pairs)
+                                  eval_sample_num=i, is_training_ph=model.is_training_ph, lr_ph=model.lr_ph, lr=lr,)
         for key, val in task_iou_map_i.items():
             try:
                 task_iou_map[key].append(val)
@@ -156,8 +148,6 @@ def optimize_update_hyperparams(sess,
                    batch_size_search_range_low: int = 8,
                    batch_size_search_range_high: int = 8,
                    augment=False,
-                   pascal_fold: Optional[int] = None,
-                   pascal_data_dir: Optional[str] = None,
                    serially_eval_all_tasks: bool = True,
                    min_steps: int = 0,
                    max_steps: int = 80,
@@ -173,11 +163,6 @@ def optimize_update_hyperparams(sess,
     """
     supported_estimators = {"GP"}
     assert estimator in supported_estimators
-
-    if pascal_fold is not None:  # TODO delete this pascal-5^i garbage.
-        img_cat_pairs = val_img_cat_pairs(pascal_fold, pascal_data_dir)
-    else:
-        img_cat_pairs = None
 
     if save_fine_tuned_checkpoints:
         print("Saving fine-tuned checkpoints to {}".format(save_fine_tuned_checkpoints_dir))
@@ -195,7 +180,7 @@ def optimize_update_hyperparams(sess,
               "minimize_op": model.minimize_op, "predictions": model.predictions, "num_classes": num_classes,
               "num_shots": num_shots, "inner_batch_size": eval_inner_batch_size,
               "replacement": replacement, "eval_all_tasks": serially_eval_all_tasks, "is_training_ph": model.is_training_ph,  # serially_eval_all_tasks
-              "lr_ph": model.lr_ph, "img_cat_pairs": img_cat_pairs, LEARNING_RATE_NAME: lr, "drop_rate_ph": model.final_layer_dropout_rate_ph, DROPOUT_RATE_NAME: drop_rate, AUG_RATE_NAME: aug_rate,
+              "lr_ph": model.lr_ph, LEARNING_RATE_NAME: lr, "drop_rate_ph": model.final_layer_dropout_rate_ph, DROPOUT_RATE_NAME: drop_rate, AUG_RATE_NAME: aug_rate,
               "eval_tasks_with_median_early_stopping_iterations": eval_tasks_with_median_early_stopping_iterations, "min_steps": min_steps, "max_steps": max_steps,
               }
 

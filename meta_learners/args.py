@@ -52,7 +52,6 @@ def argument_parser():
                         default=4)
     parser.add_argument('--data-dir', help='Path to directory housing meta-learning data.')
     parser.add_argument('--loss_name', help='Name of the loss function to use. Should be cross_entropy, soft_iou, or bce_dice', default='cross_entropy')
-    parser.add_argument('--pascal_5_fold',help="PASCAL-5i fold number to hold out.", default=2, type=int)
     parser.add_argument('--save_fine_tuned_checkpoints', help="If speced, save fine-tuned weights for test-set tasks.", action='store_true')
     parser.add_argument('--save_fine_tuned_checkpoints_train', help="If speced, save fine-tuned weights for train-set tasks.",
                         action='store_true')
@@ -93,7 +92,6 @@ def argument_parser():
                         action="store_true")
     parser.add_argument("--num_configs_to_sample", help="Number of configurations to randomly sample and evaluate if optimizing update hyperparams", default=100, type=int)
     parser.add_argument("--meta_fine_tune_steps_on_train_val", help="Run meta-fine tuning on train-val after optimizing hyperparams on val set.", type=int, default=0, required=False)
-    parser.add_argument("--sample_inner_iters", help="If speced will sample an integer for the number of inner iters between 0 and 10.", action="store_true")
     parser.add_argument("--uho_outer_iters", type=int, default=2)
     parser.add_argument("--lr_search_range_low", default=0.0005, type=float)
     parser.add_argument("--lr_search_range_high", default=0.05, type=float)
@@ -107,7 +105,7 @@ def argument_parser():
     parser.add_argument("--run_k_shot_learning_curves_experiment", action="store_true", help="If speced, will run the k-shot learning experiments, "
                                                                                              "evaluating a model across a range of k-shot examples.")
     parser.add_argument("--fp_k_test_set", help="Hold out the test task for the fp-k classes.", action="store_true")
-    parser.add_argument("--disable_lsd_residual_connections", help="Do not use residual connections in rsd modules.", action="store_true")
+    parser.add_argument("--disable_rsd_residual_connections", help="Do not use residual connections in rsd modules.", action="store_true")
     parser.add_argument("--do_not_restore_final_layer_weights", help="When restoring model from checkpoint, do not restore the final layer weights.", action="store_true")
     parser.add_argument("--eval_tasks_with_median_early_stopping_iterations", help="If this and hyperparam search provided, will eval all tasks with the median number of early stopping iters.", action="store_true")
     parser.add_argument("--min_steps", help="min inner iters to train for UHO.", type=int, default=0)
@@ -136,8 +134,8 @@ def model_kwargs(parsed_args):
             res["spatial_pyramid_pooling"] = True
         if parsed_args.skip_decoding:
             res["skip_decoding"] = True
-        if parsed_args.lsd:
-            res["rsd"] = parsed_args.lsd
+        if parsed_args.rsd:
+            res["rsd"] = parsed_args.rsd
         else:
             res["rsd"] = None
         res["feature_extractor_name"] = parsed_args.feature_extractor_name
@@ -148,8 +146,8 @@ def model_kwargs(parsed_args):
         res["label_smoothing"] = parsed_args.label_smoothing
         if "dice" not in parsed_args.loss_name:
             res["dice"] = False
-        if parsed_args.disable_lsd_residual_connections:
-            res["disable_lsd_residual_connections"] = True
+        if parsed_args.disable_rsd_residual_connections:
+            res["disable_rsd_residual_connections"] = True
     if parsed_args.sgd:
         res['optimizer'] = tf.train.GradientDescentOptimizer
     else:
@@ -210,7 +208,6 @@ def train_kwargs(parsed_args):
         'weight_decay_rate': parsed_args.weight_decay,
         'transductive': parsed_args.transductive,
         'meta_fn': _args_meta_fn(parsed_args),
-        "sample_inner_iters": parsed_args.sample_inner_iters,
         "aug_rate": parsed_args.aug_rate
     }
 

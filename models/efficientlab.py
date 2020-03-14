@@ -2,17 +2,16 @@
 EfficientLab neural network model definition adapted for few-shot meta-learning.
 """
 from functools import partial
-from typing import List, Tuple, Optional, Union
+from typing import List, Tuple, Optional
 
 import numpy as np
 import tensorflow as tf
 
-from meta_learners.drop_lr import DropLR
 from models.efficientnet import efficientnet_builder
 from models.efficientnet.constants import MEAN_RGB, STDDEV_RGB
 from models.efficientnet.efficientnet_model import conv_kernel_initializer
 from models.regularizers import darc1_term, l2_term, l1_term
-from utils.util import initialize_uninitialized_vars, latest_checkpoint
+from utils.util import latest_checkpoint
 
 DEFAULT_OPTIMIZER = partial(tf.train.AdamOptimizer, beta1=0)
 FINAL_LAYER_WEIGHTS_NAME = "final_layer_weights"

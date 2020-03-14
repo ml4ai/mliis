@@ -6,23 +6,17 @@ import datetime
 import json
 import logging
 import os
-import sys
 
 import numpy as np
 import random
 import tensorflow as tf
 
-# sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from data.fss_1000_utils import FP_K_TEST_TASK_IDS
-from data.pascal_5_constants import folds
-
 from models.constants import SUPPORTED_MODELS
 from models.efficientlab import EfficientLab
-from models.reslinknet_model import ResLinkNet
-from models.unet_model import UnetModel
 from models.lr_schedulers import supported_learning_rate_schedulers
 from meta_learners.args import argument_parser, model_kwargs, train_kwargs, evaluate_kwargs, hyper_search_kwargs
-from meta_learners.metaseg import read_dataset, read_fss_1000_dataset, read_fp_k_shot_dataset
+from meta_learners.metaseg import read_fss_1000_dataset, read_fp_k_shot_dataset
 from meta_learners.supervised_reptile.supervised_reptile.eval import evaluate_gecko, optimize_update_hyperparams, \
     run_k_shot_learning_curves_experiment
 from meta_learners.supervised_reptile.supervised_reptile.train import train_gecko
@@ -95,27 +89,11 @@ def main():
         train_set, val_set, test_set, train_task_names, val_task_names, test_task_names = dataset
         if len(val_set) == 0:
             val_set = None
-        pascal_fold_num = None
-    elif args.fss_1000:
+    else:
         dataset = read_fss_1000_dataset(DATA_DIR, num_val_tasks=args.num_val_tasks)
         train_set, val_set, test_set, train_task_names, val_task_names, test_task_names = dataset
         if len(val_set) == 0:
             val_set = None
-        pascal_fold_num = None
-    else:
-        print("Training and validating with PASCAL-5^i")
-        pascal_fold_num = args.pascal_5_fold
-        print("Holding out PASCAL-5^i Fold number: {}".format(pascal_fold_num))
-        test_task_names = folds[pascal_fold_num]
-        # Substrings of basenames of tfrecord files on disk inside DATA_DIR:
-        print("Holding out test tasks: {}".format(test_task_names))
-
-        train_set, val_set, test_set = read_dataset(DATA_DIR,
-                                           test_task_names=test_task_names,
-                                           num_train_shots=args.train_shots,
-                                           image_size=args.image_size,
-                                           num_test_shots=20)
-        # serially_eval_all_test_tasks = False
 
     validate_datasets(args, train_set, val_set, test_set)
 
@@ -161,11 +139,9 @@ def main():
             assert len(val_set) > 0, "Dev set has no tasks"
             save_fine_tuned_checkpoints_test = eval_kwargs["save_fine_tuned_checkpoints"]
             eval_kwargs["save_fine_tuned_checkpoints"] = False
-            # TODO: thread through dropout search range low and high from CLI args.
             num_train_val_data_splits_to_sample_per_config = 1 if args.fss_1000 else 4
             estimated_lr, estimated_steps = optimize_update_hyperparams(sess, model, val_set,
                                     lr_scheduler=lr_scheduler,
-                                    pascal_fold=pascal_fold_num, pascal_data_dir=DATA_DIR,
                                     serially_eval_all_tasks=serially_eval_all_test_tasks,
                                     num_configs_to_sample=args.num_configs_to_sample, save_dir=args.checkpoint,
                                    results_csv_name=args.uho_results_csv_name,
@@ -213,7 +189,7 @@ def main():
                 test_set_string = "test"
             print('Evaluating {}-shot learning on meta-{} tasks.'.format(args.shots, test_set_string))
             mean_test_iou, task_name_iou_map = evaluate_fn(sess, model, test_set, visualize_predicted_segmentations=False,
-                                        lr_scheduler=lr_scheduler, pascal_fold=pascal_fold_num, pascal_data_dir=DATA_DIR,
+                                        lr_scheduler=lr_scheduler,
                                         serially_eval_all_tasks=serially_eval_all_test_tasks, **eval_kwargs)
 
             print("Evaluated meta-{} tasks:".format(test_set_string))

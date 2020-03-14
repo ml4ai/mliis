@@ -12,25 +12,16 @@ import numpy as np
 import tensorflow as tf
 
 from augmenters.np_augmenters import Augmenter
-from data.pascal_5_i_utils import sample_dataset
 from meta_learners.hyperparam_search import EarlyStopper
 from meta_learners.metaseg import _sample_mini_image_segmentation_dataset, _mini_batches, \
     _split_train_test_segmentation, DEFAULT_NUM_TEST_EXAMPLES, _sample_train_test_segmentation_with_replacement
-from meta_learners.regularizers import sample_num_steps
-# from meta_learners.supervised_reptile.supervised_reptile.eval import DEFAULT_ITER_RANGE
 from utils.viz import plot_mask_on_image, savefig_mask_on_image
 from meta_learners.variables import (interpolate_vars, average_vars, subtract_vars, add_vars, scale_vars,
                                      VariableState)
 
-from utils.util import hash_np_array, save_fine_tuned_checkpoint, get_training_set_hash_map
+from utils.util import save_fine_tuned_checkpoint
 
-# DEFAULT_ITER_RANGE = [1, 5, 10, 15, 25, 50, 100]
 DEFAULT_ITER_RANGE = [1, 5, 10, 25, 50, 100, 200]
-#  DEFAULT_K_RANGE = [1, 5, 10, 50, 100, 200, 400]
-# DEFAULT_ITER_RANGE = [51, 80, 100, 150, 200, 300, 400]
-# TODO Rerun with:
-# DEFAULT_ITER_RANGE = [5, 10, 20]
-
 
 class Gecko:
     """
@@ -73,7 +64,6 @@ class Gecko:
 
         print("Reptile meta-learning session instantiated.")
 
-    # pylint: disable=R0913,R0914
     def train_step(self,
                    dataset,
                    input_ph,
@@ -88,7 +78,6 @@ class Gecko:
                    meta_batch_size,
                    lr_ph=None,
                    lr=None,
-                   sample_inner_iters=False,
                    verbose=False,):
         """
         Perform a Reptile training step.
@@ -109,54 +98,32 @@ class Gecko:
           meta_step_size: interpolation coefficient.
           meta_batch_size: how many inner-loops to run.
           lr_ph: learning rate placeholder for schedule learning rates
-          sample_inner_iters: If True, sample the number of inner iters.
         """
-        DEBUG = False
         # Hardcode binary Gecko:
         num_classes = 1
 
         old_vars = self._model_state.export_variables()
         new_vars = []
         for _ in range(meta_batch_size):
-            # Sample a task with num_shots examples:
             if verbose:
                 print('Sampling new task.')
-            mini_dataset = _sample_mini_image_segmentation_dataset(self.session, dataset, num_classes, num_shots) # mini_dataset is an iterable of (input, label) pairs of length num_shots.
-            # train_set, val_set = _split_train_test_segmentation(mini_dataset, val_shots)  # Could sample here for meta-learning inner early stopping (MLIES)
-            if sample_inner_iters:
-                inner_iters = sample_num_steps()
-            # loop through `inner_iters` batches of the task:
+            mini_dataset = _sample_mini_image_segmentation_dataset(self.session, dataset, num_classes, num_shots)
             for i, batch in enumerate(_mini_batches(mini_dataset, inner_batch_size, inner_iters, replacement, augmenter=self.augmenter)):
                 if verbose:
                     print('Sampling new mini_batch.')
                 inputs, labels = zip(*batch)
                 if self._pre_step_op:
                     self.session.run(self._pre_step_op)
-                # Test/debug code:
-                if DEBUG:
-                    for j in range(len(inputs)):
-                        print("Background")
-                        plot_mask_on_image(inputs[j], labels[j][:, :, 0])
-                        print("Class of interest")
-                        plot_mask_on_image(inputs[j], labels[j][:, :, 1])
-                        # import pdb; pdb.set_trace()
-                        # if j > 1:
-                        #    break
-                if not DEBUG:
-                    if (lr_ph is not None) and (lr is not None):
-                        self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels,
-                                                                 lr_ph: lr})
-                    if (lr_ph is not None) and (self.lr_scheduler is not None):
-                        self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels,
-                                                                 lr_ph: self.lr_scheduler.cur_lr(cur_step=i)})
-                    else:
-                        self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels})
-                # Could evaluate meta-learning inner early stopping with patience here
-
-            # Append each task's learned parameters to new_vars:
+                if (lr_ph is not None) and (lr is not None):
+                    self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels,
+                                                             lr_ph: lr})
+                if (lr_ph is not None) and (self.lr_scheduler is not None):
+                    self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels,
+                                                             lr_ph: self.lr_scheduler.cur_lr(cur_step=i)})
+                else:
+                    self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels})
             new_vars.append(self._model_state.export_variables())
             self._model_state.import_variables(old_vars)
-         # Average the updated model variables across new tasks in meta-step: (See eq. 5 (batch version) in Nichol et al. 2018 On First-Order Meta-Learning Algorithms)
         new_vars = average_vars(new_vars)
         self._model_state.import_variables(interpolate_vars(old_vars, new_vars, meta_step_size))
 
@@ -677,7 +644,6 @@ class FOMLIS(Gecko):
                    verbose=False,
                    lr_ph=None,
                    lr=None,
-                   sample_inner_iters=False,
                    ):
         old_vars = self._model_state.export_variables()
         updates = []
@@ -685,9 +651,7 @@ class FOMLIS(Gecko):
             if verbose:
                 print('Sampling new task.')
             mini_dataset = _sample_mini_image_segmentation_dataset(self.session, dataset, num_classes,
-                                                                   num_shots)  # mini_dataset is an iterable of (input, label) pairs of length num_shots.
-            if sample_inner_iters:
-                inner_iters = sample_num_steps(low=2)  # Min should be 2. If 1, this reduces to a Reptile step.
+                                                                   num_shots)
             mini_batches = self._mini_batches(mini_dataset, inner_batch_size, inner_iters,
                                               replacement)
 
@@ -700,7 +664,6 @@ class FOMLIS(Gecko):
                 if self._pre_step_op:
                     self.session.run(self._pre_step_op)
                 if (lr_ph is not None) and (lr is not None):
-                    # print('Setting lr in train steps to {}'.format(lr))  # FIXME: delete
                     self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels,
                                                              lr_ph: lr})
                 else:

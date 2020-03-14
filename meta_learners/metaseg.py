@@ -1,13 +1,5 @@
 """
-Loading the MetaSeg dataset.
-
-To use these APIs, you will need a directory that
-contains all of the labeled binary segmentation images inside of task-level tfrecords, e.g.:
-meta_seg_data_dir/
-    test/
-        aeroplane_val.tfrecord.gzip
-        ...
-    train
+APIs for loading the meta-learning segmentation datasets.
 """
 
 import os
@@ -27,76 +19,6 @@ from utils.util import count_examples_in_tfrecords, hash_np_array
 
 DEFAULT_NUM_TEST_EXAMPLES = 5
 DEFAULT_K_SHOT_SET = [{"airliner", "aeroplane"}, {"bus"}, {"motorbike"}, {"potted_plant", "potted plant"}, {"television", "tvmonitor"}]
-
-
-def read_dataset(data_dir:str,
-                 test_task_names:List[str]=["table", "dog", "horse", "motorbike", "person"],  # pascal-5i fold 2
-                 num_train_shots: int = 5,
-                 num_test_shots: int = DEFAULT_NUM_TEST_EXAMPLES,
-                 test_tfrecords_must_include:str = "_val.",
-                 count_unique_examples: bool = False,
-                 image_size: Optional[int] = None
-    ) -> Tuple[List["BinarySegmentationTask"], Optional[List["BinarySegmentationTask"]], List["BinarySegmentationTask"]]:
-    """
-    Reads in a meta-learning image segmentation dataset.
-    Args:
-      data_dir: a directory containing tfrecords files for each semantic class.
-
-    Returns:
-      Tuple of (training_tasks, testing_tasks). Both items in the tuple are lists of BinarySegmentationTasks.
-    """
-    from data.pascal_5_constants import superset
-    # Remove spaces:
-    superset = [x.replace(" ", "") for x in superset]
-    test_task_names = [test_task.replace(" ", "")
-                       for test_task in test_task_names]
-    training_tasks, test_tasks = [], []
-    iterator = None
-
-    shards = glob.glob(os.path.join(data_dir, "*.tfrecord*"))
-
-    for task_name in superset:
-        if task_name in test_task_names:
-            suffix = test_tfrecords_must_include
-            patterns = [task_name + suffix]
-        else:
-            suffix = "_train."
-            # Get all the shards for training tasks:
-            patterns = [task_name + suffix, task_name + test_tfrecords_must_include]
-
-        task_shards = []
-        for shard in shards:
-            for pattern in patterns:
-                if pattern in shard:
-                    task_shards.append(shard)
-
-        n_egs = count_examples_in_tfrecords(task_shards, count_unique_examples=count_unique_examples)
-        print("{} examples in task {}".format(n_egs, task_name))
-        if task_name in test_task_names:
-            batch_size = n_egs
-            # batch_size = num_train_shots + num_test_shots
-        elif n_egs < (num_train_shots + num_test_shots):
-            batch_size = n_egs
-        else:
-            # This is a meta-training task and there are more examples than requested training and validation shots
-            batch_size = num_train_shots + num_test_shots
-        task = BinarySegmentationTask(
-            iterator=iterator,
-            tfrecord_paths=task_shards,
-            batch_size=batch_size,
-            name=task_name,
-            image_size=image_size)
-        # Reinitialize all tasks using the same iterator.
-        if not iterator:
-            print("making new iterator in read_dataset for task: {}".format(task_name))
-            iterator = task.iterator
-
-        if task_name in test_task_names:
-            test_tasks.append(task)
-        else:
-            training_tasks.append(task)
-
-    return training_tasks, None, test_tasks
 
 
 def read_fss_1000_dataset(data_dir: str,
