@@ -49,4 +49,4 @@ export SAVE_PREDICTIONS=1
 ```
 
 ## EfficientLab
-Our SOTA network architecture class is defined in 
+Our SOTA network architecture class is defined in `models/efficientlab`.
