@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
 
 
-cd experiments/
-
-
 data_dir=fewshot_shards/
 name=meta-eval_GPUHO_EffLab_rsd-stages-3-6_`date +%s`
-checkpoint_dir=../EfficientLab-6-3_FOMAML-star_checkpoint
+checkpoint_dir=EfficientLab-6-3_FOMAML-star_checkpoint
 
-python ../run_metasegnet.py --fss_1000 --image_size 224 \
+python run_metasegnet.py --fss_1000 --image_size 224 \
     --pretrained \
     --rsd 2 4 --l2 \
     --foml --foml-tail 5 \
