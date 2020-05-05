@@ -1,6 +1,6 @@
 # Meta-Learning Initializations for Image Segmentation
 
-Code for meta-learning and evaluating initializations for image segmentation.
+Code for meta-learning and evaluating initializations for image segmentation as described in our paper <https://arxiv.org/abs/1912.06290>.
 
 
 ## Setup
@@ -21,8 +21,9 @@ https://drive.google.com/open?id=1G1NJIyQlkxAb4vlsRDPR3W3If_RJ4rPd
 We created our meta-training tfrecord shards by following these steps.
 Download the FSS-1000 dataset from https://github.com/HKUSTCV/FSS-1000
 Convert the images and masks to tfrecords:
+```
 python fss_1000_image_to_tfrecord.py --input_dir <path to images and masks> --tfrecord_dir <directory to write tfrecords in>
-
+```
 
 ## Run the SOTA evaluation
 
@@ -57,4 +58,4 @@ export SAVE_PREDICTIONS=1
 ```
 
 ## EfficientLab
-Our SOTA network architecture class is defined in `models/efficientlab`.
+Our SOTA network architecture class is defined in `models/efficientlab.py`.
