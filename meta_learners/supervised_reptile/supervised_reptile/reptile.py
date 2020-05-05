@@ -1,12 +1,9 @@
 """
-Supervised Reptile learning and evaluation on arbitrary
-datasets.
+Supervised Reptile learning and evaluation on image segmentation datasets.
 """
-import copy
 import os
 import random
 from typing import Optional, Tuple, List, Dict, Union
-import warnings
 
 import numpy as np
 import tensorflow as tf
@@ -15,7 +12,7 @@ from augmenters.np_augmenters import Augmenter
 from meta_learners.hyperparam_search import EarlyStopper
 from meta_learners.metaseg import _sample_mini_image_segmentation_dataset, _mini_batches, \
     _split_train_test_segmentation, DEFAULT_NUM_TEST_EXAMPLES, _sample_train_test_segmentation_with_replacement
-from utils.viz import plot_mask_on_image, savefig_mask_on_image
+from utils.viz import savefig_mask_on_image
 from meta_learners.variables import (interpolate_vars, average_vars, subtract_vars, add_vars, scale_vars,
                                      VariableState)
 
@@ -141,7 +138,6 @@ class Gecko:
                  eval_all_tasks=False,
                  num_tasks_to_sample=1,
                  test_shots=DEFAULT_NUM_TEST_EXAMPLES,
-                 visualize_predicted_segmentations=False,
                  verbose=False,
                  save_fine_tuned_checkpoints=False,
                  save_fine_tuned_checkpoints_dir: Optional[str] = None,
@@ -215,7 +211,6 @@ class Gecko:
                  inner_batch_size=inner_batch_size,
                  inner_iters=inner_iters,
                  replacement=replacement,
-                 visualize_predicted_segmentations=visualize_predicted_segmentations,
                  verbose=verbose,
                  save_fine_tuned_checkpoints=save_fine_tuned_checkpoints,
                  save_fine_tuned_checkpoints_dir=save_fine_tuned_checkpoints_dir,
@@ -247,7 +242,6 @@ class Gecko:
                  inner_batch_size,
                  inner_iters,
                  replacement,
-                 visualize_predicted_segmentations=False,
                  verbose=False,
                  save_fine_tuned_checkpoints=False,
                  save_fine_tuned_checkpoints_dir: Optional[str] = None,
@@ -291,22 +285,6 @@ class Gecko:
                                        eval_sample_num=eval_sample_num)
 
         test_preds = self._test_predictions(train_set, test_set, input_ph, predictions, is_training_ph, task_name=task_name)
-
-        # TODO: delete viz
-        if visualize_predicted_segmentations:
-            # Visualize data right before it goes into final IOU computation
-            for j in range(len(test_preds)):
-                image_i = test_set[j][0]
-                label_i = test_set[j][1]
-                predicted_mask_i = test_preds[j]
-                print("Background label")
-                plot_mask_on_image(image_i, label_i[:, :, 0])
-                print("Class of interest label")
-                plot_mask_on_image(image_i, label_i[:, :, 1])
-                print("Prediction of class of interest")
-                plot_mask_on_image(image_i, predicted_mask_i[:, :, 1])
-                if j > 1:
-                   break
 
         # Pass prediction and label arrays to _iou:
         class_iou = [self._iou(test_preds[j], test_set[j][1]) for j in range(len(test_preds))]
@@ -483,7 +461,7 @@ class Gecko:
             elif (lr_ph is not None) and (lr is not None):
                 self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels,
                                                  lr_ph: lr})
-            elif (lr_ph is not None) and (lr_scheduler is not None):  # TODO: delete lr_scheduler for release
+            elif (lr_ph is not None) and (lr_scheduler is not None):
                 self.session.run(minimize_op, feed_dict={input_ph: inputs, label_ph: labels,
                                                  lr_ph: lr_scheduler.cur_lr(cur_step=inner_iter)})
             else:  # Use hyperparam defaults:
@@ -516,9 +494,9 @@ class Gecko:
         """
         # To save predictions run in shell: export SAVE_PREDICTIONS=1
         try:
-            DEBUG = bool(os.environ["SAVE_PREDICTIONS"])
+            save_vized_predictions = bool(os.environ["SAVE_PREDICTIONS"])
         except KeyError:
-            DEBUG = False
+            save_vized_predictions = False
         if self._transductive:
             inputs, _ = zip(*test_set)
             if is_training_ph is None:
@@ -527,7 +505,7 @@ class Gecko:
                 # Use estimated population mean and variances for batch norm by setting is_training_ph to False (which also turns off dropout):
                 res = self.session.run(predictions, feed_dict={input_ph: inputs, is_training_ph: False})
 
-            if DEBUG:
+            if save_vized_predictions:
                 for i, query_prediction in enumerate(zip(inputs, res)):
                     query, prediction = query_prediction
                     task_name = "" if task_name is None else task_name

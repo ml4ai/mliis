@@ -25,7 +25,6 @@ def read_fss_1000_dataset(data_dir: str,
                           num_val_tasks: int = 0,
                           num_test_tasks: int = 240,
                           test_task_ids: Optional[List[str]] = TEST_TASK_IDS,
-                          count_unique_examples: bool = False,
                           image_size: Optional[int] = 224
                           ) -> Tuple[List["BinarySegmentationTask"], List["BinarySegmentationTask"], List["BinarySegmentationTask"],
                 List[str], List[str], List[str]]:
@@ -67,7 +66,7 @@ def read_fss_1000_dataset(data_dir: str,
     for task in train_shards:
         task_name = os.path.basename(task)
         train_task_names.append(task_name)
-        batch_size = count_examples_in_tfrecords([task], count_unique_examples=count_unique_examples)
+        batch_size = count_examples_in_tfrecords([task])
         if verbose:
             print("{} examples in task {}".format(batch_size, task_name))
         few_shot_seg_task = BinarySegmentationTask(
@@ -88,7 +87,7 @@ def read_fss_1000_dataset(data_dir: str,
     for task in val_shards:
         task_name = os.path.basename(task)
         val_task_names.append(task_name)
-        batch_size = count_examples_in_tfrecords([task], count_unique_examples=count_unique_examples)
+        batch_size = count_examples_in_tfrecords([task])
         if verbose:
             print("Meta-val task: {}".format(task_name))
             print("{} examples in task {}".format(batch_size, task_name))
@@ -106,7 +105,7 @@ def read_fss_1000_dataset(data_dir: str,
     for task in test_shards:
         task_name = os.path.basename(task)
         test_task_names.append(task_name)
-        batch_size = count_examples_in_tfrecords([task], count_unique_examples=count_unique_examples)
+        batch_size = count_examples_in_tfrecords([task])
         if verbose:
             print("Meta-test task: {}".format(task_name))
             print("{} examples in task {}".format(batch_size, task_name))

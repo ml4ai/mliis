@@ -21,34 +21,22 @@ def hash_np_array(a: np.array) -> bytes:
     return m.digest()
 
 
-def count_examples_in_tfrecords(paths: List[str], count_unique_examples: bool = False, hash_only_on_image: bool = False, image_size: Optional[int] = None) -> int:
-    # if image_size is None:
-    #     image_size = _IMAGE_WIDTH
+def count_examples_in_tfrecords(paths: List[str]) -> int:
     if not isinstance(paths, list):
         paths = list(paths)
     options = tf.python_io.TFRecordOptions(tf.python_io.TFRecordCompressionType.GZIP)
-    # if count_unique_examples:
-    #     examples = set()
     c = 0
     with tf.Session() as sess:
         for fn in paths:
             for record in tf.python_io.tf_record_iterator(fn, options=options):
-                # if count_unique_examples:
-                #     image, mask = parse_example(record, image_size)
-                #     if hash_only_on_image:
-                #         examples.add(hash_np_array(image.eval()))
-                #     else:
-                #         examples.add((hash_np_array(image.eval()), hash_np_array(mask.eval())))
                 c += 1
-    # if count_unique_examples:
-    #     c = len(examples)
     return c
 
 
 def count_unique_task_examples(dir: str, task_name: str) -> int:
     shards = glob.glob(os.path.join(dir, "*.tfrecord*"))
     shards = [x for x in shards if task_name in x]
-    return count_examples_in_tfrecords(shards, count_unique_examples=True, hash_only_on_image=True)
+    return count_examples_in_tfrecords(shards)
 
 
 def latest_checkpoint(checkpoint_dir: str, ckpt_prefix: str = "model.ckpt", return_relative: bool = True) -> str:
@@ -120,27 +108,6 @@ def is_image_file(path):
         return True
     else:
         return False
-
-
-def cosine_similarity(a: tf.Tensor, b: tf.Tensor) -> tf.Tensor:
-    """
-    Computes the cosine similarity of the channels of a and b at every location of a and b.
-    Assumes channels last.
-
-    Args:
-        a and b should be 3D tensors of the same shape. This func should be called with map_fn to operate on each example in the batch independently
-    Returns:
-        2D tensor of shape tf.shape(a)[0: 2]   # i.e. a scalar for all rows and cols
-    """
-    # return tf.tensordot(a, b) / (tf.nn.l2_normalize(a, -1) * tf.nn.l2_normalize(b, -1))
-    normalize_a = tf.nn.l2_normalize(a, [0, 1])
-    normalize_b = tf.nn.l2_normalize(b, [0, 1])
-    print("normalize_a.shape")
-    print(normalize_a.shape)
-    out = tf.reduce_sum(tf.multiply(normalize_a, normalize_b), axis=-1)
-    print("out.shape")
-    print(out.shape)
-    return out
 
 
 def initialize_uninitialized_vars(session, list_of_variables=None):

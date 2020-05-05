@@ -1,7 +1,7 @@
 """
 Functions to estimate optimal hyperparameters when adapting to unseen tasks.
 
-Contains the implementation of the Update Hyperparameter Optimization algorithm.
+Contains the implementation of update hyperparameter optimization (UHO) with Bayesian optimization and Gaussian processes.
 """
 
 from collections import deque
@@ -82,7 +82,6 @@ def run_m(eval_fn: Callable, params: Dict, m: int = 1):
     Returns:
         The metrics returned by running eval_fn with params
     """
-    # print("Running evaluation with params: {}".format(params))
     all_task_ids, all_num_steps, all_metrics = [], [], []
     for _ in range(m):
         task_ids, num_steps, metrics = eval_fn(**params)
@@ -223,7 +222,6 @@ def gp_update_hyperparameter_optimization(eval_fn: Callable, hyperparams: Dict, 
     )
 
     results = []
-    # Would just need to add function evaluation logic to this loop.
     for i in range(n):
         print("Running configuration sample {} of {}.".format(i + 1, n))
         print("With sampled hyperparams:")
@@ -257,7 +255,7 @@ def lr_droprate_aug_rate_batch_size_gp_search(eval_fn: Callable, params: Dict, l
                                               batch_size_name: str = BATCH_SIZE_NAME, batch_size_search_range_low: int = 8, batch_size_search_range_high: int = 8,
                                               n: int = 100,
                                               save_results_to: str = "hyper_param_search_results.csv", m: int = 1,
-                                              metric_should_increase: bool = True, metric_name: str = "mIoU", b: int = 3, x: float = 0.1) -> Tuple[float, int]:
+                                              metric_should_increase: bool = True, metric_name: str = "mIoU") -> Tuple[float, int]:
     """
     Performs search over learning rates by randomly sampling within range and successively reducing the range based on
     top x percent of results. Returns the best learning rate and expected number of iterations.

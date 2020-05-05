@@ -64,7 +64,6 @@ def evaluate_gecko(sess,
                                   inner_batch_size=eval_inner_batch_size,
                                   inner_iters=eval_inner_iters, replacement=replacement,
                                   eval_all_tasks=serially_eval_all_tasks,
-                                  visualize_predicted_segmentations=visualize_predicted_segmentations,
                                   save_fine_tuned_checkpoints=save_fine_tuned_checkpoints,
                                   save_fine_tuned_checkpoints_dir=save_fine_tuned_checkpoints_dir,
                                   eval_sample_num=i, is_training_ph=model.is_training_ph, lr_ph=model.lr_ph, lr=lr,)

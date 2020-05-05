@@ -1,6 +1,5 @@
+# Modified Copyright 2020 Sean M. Hendryx. All Rights Reserved.
 # Copyright 2019 The TensorFlow Authors. All Rights Reserved.
-#
-# Modified Copyright 2019 Anonymized for submission
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
