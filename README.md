@@ -61,3 +61,7 @@ export SAVE_PREDICTIONS=1
 
 ## EfficientLab
 Our SOTA network architecture class is defined in `models/efficientlab.py`.
+
+
+## Acknowledgements
+This repository builds on the [Reptile implementation by OpenAI](https://github.com/openai/supervised-reptile) and the [EfficientNet backbone implementation by Google](https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet).
