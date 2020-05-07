@@ -15,8 +15,10 @@ https://drive.google.com/open?id=1aGHP0ev_1eAFSnYtN0ObDI-DnB0TsQUU
 And the joint-training shards from:
 https://drive.google.com/open?id=1aQpyQ0CEBCL9EW8xoCaI6xveYxtXNYKq
 
-And the FP-k dataset shards from:
+The FP-k dataset shards are available at:
 https://drive.google.com/open?id=1G1NJIyQlkxAb4vlsRDPR3W3If_RJ4rPd
+
+These were derived from the [FSS-1000](https://github.com/HKUSTCV/FSS-1000), [PASCAL](http://host.robots.ox.ac.uk/pascal/VOC/), and [Semantic Boundaries Datasets](http://home.bharathh.info/pubs/codes/SBD/download.html) 
 
 We created our meta-training tfrecord shards by following these steps.
 Download the FSS-1000 dataset from https://github.com/HKUSTCV/FSS-1000
