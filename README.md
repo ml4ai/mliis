@@ -18,7 +18,8 @@ https://drive.google.com/open?id=1aQpyQ0CEBCL9EW8xoCaI6xveYxtXNYKq
 The FP-k dataset shards are available at:
 https://drive.google.com/open?id=1G1NJIyQlkxAb4vlsRDPR3W3If_RJ4rPd
 
-These were derived from the [FSS-1000](https://github.com/HKUSTCV/FSS-1000), [PASCAL](http://host.robots.ox.ac.uk/pascal/VOC/), and [Semantic Boundaries Datasets](http://home.bharathh.info/pubs/codes/SBD/download.html) 
+The FP-k dataset is derived from the [FSS-1000](https://github.com/HKUSTCV/FSS-1000) and PASCAL-5i datasets. PASCAL-5i was in turn derived from the parent datasets: [PASCAL](http://host.robots.ox.ac.uk/pascal/VOC/) and [Semantic Boundaries Datasets](http://home.bharathh.info/pubs/codes/SBD/download.html) as described in [One-Shot Learning for Semantic Segmentation
+](https://arxiv.org/abs/1709.03410).
 
 We created our meta-training tfrecord shards by following these steps.
 Download the FSS-1000 dataset from https://github.com/HKUSTCV/FSS-1000
