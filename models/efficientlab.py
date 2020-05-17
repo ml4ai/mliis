@@ -310,7 +310,6 @@ class EfficientLab:
         if self.l1:
             print("Adding l1 weight decay term to loss")
             loss += l1_term()
-        # TODO: try l1
         self.loss = loss
 
         update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
