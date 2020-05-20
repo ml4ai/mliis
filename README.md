@@ -7,6 +7,19 @@ Example 5 shot predictions on test samples from meta-test tasks:
 ![5-shot](figures/example_5-shot_predictions.png)
 
 
+## Citing
+If you find this project useful in your research, please consider citing:
+
+```
+@article{hendryx2019meta,
+  title={Meta-Learning Initializations for Image Segmentation},
+  author={Hendryx, Sean M and Leach, Andrew B and Hein, Paul D and Morrison, Clayton T},
+  journal={arXiv preprint arXiv:1912.06290},
+  year={2019},
+  volume={abs/1912.06290}
+}
+```
+
 ## Setup
 
 
