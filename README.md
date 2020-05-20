@@ -67,7 +67,7 @@ export SAVE_PREDICTIONS=1
 ## EfficientLab
 Our SOTA network architecture class is defined in `models/efficientlab.py`.
 
-![EfficientLab](figures/EfficientLab.pdf)
+![EfficientLab](figures/EfficientLab.png)
 
 
 ## Acknowledgements
