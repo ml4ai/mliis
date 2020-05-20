@@ -2,6 +2,10 @@
 
 Code for meta-learning and evaluating initializations for image segmentation as described in our paper <https://arxiv.org/abs/1912.06290>.
 
+Example 5 shot predictions on test samples from meta-test tasks:
+
+![5-shot](figures/example_5-shot_predictions.png)
+
 
 ## Setup
 
@@ -62,6 +66,8 @@ export SAVE_PREDICTIONS=1
 
 ## EfficientLab
 Our SOTA network architecture class is defined in `models/efficientlab.py`.
+
+![EfficientLab](figures/EfficientLab.pdf)
 
 
 ## Acknowledgements
