@@ -77,6 +77,13 @@ To see predictions, set the environment variable ala:
 export SAVE_PREDICTIONS=1
 ```
 
+## Save an adapted model
+To save the weights of an updated model on your task(s), run:
+```
+python run_metasegnet.py --save_fine_tuned_checkpoints --save_fine_tuned_checkpoints_dir /path/to/save/to <--other_args>
+```
+See `run.sh` for our recommended hyperparameters found via update hyperparameter optimization.
+
 ## EfficientLab
 Our SOTA network architecture class is defined in `models/efficientlab.py`.
 
