@@ -1,9 +1,8 @@
 # Meta-Learning Initializations for Image Segmentation
 
-Note that this repository is in archival status. Code is provided as-is and no updates are expected.
-
-
 Code for meta-learning and evaluating initializations for image segmentation as described in our paper <https://arxiv.org/abs/1912.06290>, which was [presented at the 4th Workshop on Meta-Learning at NeurIPS 2020](https://meta-learn.github.io/2020/papers/44_paper.pdf). 
+
+Note that this repository is in archival status. Code is provided as-is and no updates are expected.
 
 Example 5 shot predictions on test samples from meta-test tasks:
 
